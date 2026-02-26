@@ -1,0 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "go run github.com/steebchen/prisma-client-go"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id String @id @default(uuid())
+  name String 
+  current_rating Int @default(1000)
+  max_rating Int @default(1000)
+  contests_played Int @default(0)
+  tier String @default("Unrated")
+
+  ratingHistory RatingHistory[]
+  @@map("users")
+}
+
+model Contest {
+  id String @id @default(uuid())
+  name String 
+  date DateTime @default(now())
+  total_participants Int 
+  ratingHistory RatingHistory[]
+  @@map("contests")
+}
+
+model RatingHistory{
+  id String @id @default(uuid())
+  user_id String 
+  contest_id String 
+  old_rating Int 
+  new_rating Int 
+  performance_rating Int 
+  rank Int 
+  percentile Float 
+  rating_change Int 
+
+  user User @relation(fields:[user_id],references:[id])
+  contest Contest @relation(fields:[contest_id],references:[id])
+  @@map("rating_history")
+}
