@@ -3,14 +3,17 @@ package services
 import (
 	"contest-backend/internal/models"
 	"contest-backend/internal/repository"
+	"contest-backend/prisma/db"
 	"context"
 	"fmt"
 	"math"
+
 )
 
 // ratingService defines the interface for core business logic
 type RatingService interface {
 	ProcessContestResults(ctx context.Context, payload models.ContestEndPayload) error
+	GetUserProfile(ctx context.Context, userID string) (*db.UserModel, error)
 }
 
 type ratingService struct{
@@ -114,5 +117,9 @@ func (s *ratingService) ProcessContestResults(ctx context.Context,payload models
 		}
 	}
 	return nil
+}
+
+func (s * ratingService) GetUserProfile(ctx context.Context, userID string) (*db.UserModel, error){
+	return s.repo.GetUserProfile(ctx,userID)
 }
 

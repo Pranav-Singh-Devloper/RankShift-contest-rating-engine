@@ -15,4 +15,7 @@ func SetupRoutes(app *fiber.App, ratingHandler handlers.RatingHandler){
 
 	// Contest Routes 
 	api.Post("/contests/end", ratingHandler.HandleContestEnd)
+
+	// Histroy Route
+	api.Get("/users/:id",ratingHandler.GetProfile)
 }

@@ -11,6 +11,7 @@ import (
 // ratingHandler 
 type RatingHandler interface {
 	HandleContestEnd(c *fiber.Ctx) error
+	GetProfile(c *fiber.Ctx) error
 }
 
 type ratingHandler struct {
@@ -58,4 +59,19 @@ func (h *ratingHandler) HandleContestEnd(c * fiber.Ctx) error {
 		"Message":"Contest ratings calculated and updated successfully",
 	})
 
+}
+
+func (h *ratingHandler) GetProfile(c *fiber.Ctx) error {
+	userID := c.Params("id")
+
+	ctx, cancel := context.WithTimeout(context.Background(),5*time.Second)
+	defer cancel()
+
+	user,err := h.service.GetUserProfile(ctx,userID)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error":"User not found",
+		})
+	}
+	return c.Status(fiber.StatusOK).JSON(user)
 }

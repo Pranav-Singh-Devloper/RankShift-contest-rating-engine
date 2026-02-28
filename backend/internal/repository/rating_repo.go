@@ -27,6 +27,7 @@ type RatingRepository interface{
 	GetContest(ctx context.Context, contestID string) (*db.ContestModel,error)
 	GetUser(ctx context.Context, userID string) (*db.UserModel,error)
 	SaveRatingUpdate(ctx context.Context, params UpdateParams) error
+	GetUserProfile(ctx context.Context, UserID string) (*db.UserModel,error)
 }
 
 type ratingRepo struct {
@@ -93,4 +94,18 @@ func (r *ratingRepo) SaveRatingUpdate(ctx context.Context, params UpdateParams)e
 		return fmt.Errorf("transaction failed :%w",err)
 	}
 	return nil
+}
+
+func (r *ratingRepo) GetUserProfile(ctx context.Context, userID string)(*db.UserModel, error) {
+	user, err := r.client.User.FindUnique(
+		db.User.ID.Equals(userID),
+	).With(
+		db.User.RatingHistory.Fetch().With(
+			db.RatingHistory.Contest.Fetch(),
+		),
+	).Exec(ctx)
+	if err != nil {
+		return nil,err
+	}
+	return user,nil
 }
