@@ -6,7 +6,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"contest-backend/internal/models"
 	"contest-backend/internal/services"
-	"fmt"
 )
 
 // ratingHandler 
