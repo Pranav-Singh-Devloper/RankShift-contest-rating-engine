@@ -1,39 +1,33 @@
 # backend/Dockerfile
-# Build Stage
 FROM golang:1.23-alpine AS builder
 
-# Install required system dependencies for Prisma
+# 1. Install system dependencies
 RUN apk add --no-cache openssl git ca-certificates
 
 WORKDIR /app
 
-# Cache Go modules
+# 2. Copy dependency files FIRST (Optimizes build caching)
+# Since your Root Directory is /backend, these files are in the current context
 COPY go.mod go.sum ./
+
+# 3. Explicitly set proxy and download
+ENV GOPROXY=https://proxy.golang.org,direct
 RUN go mod download
 
-# Copy the rest of the application
+# 4. Copy the rest of the backend source code
 COPY . .
 
-# Generate the Prisma Go Client
+# 5. Generate Prisma and Build
 RUN go run github.com/steebchen/prisma-client-go generate
-
-# Build the Go binary
 RUN CGO_ENABLED=0 GOOS=linux go build -o /app/engine-api ./cmd/api
 
-# Final Production Stage
+# Final Stage
 FROM alpine:latest
-
-# Install OpenSSL (required by Prisma engine at runtime)
 RUN apk add --no-cache openssl ca-certificates
-
 WORKDIR /app
 
-# Copy the compiled binary and the Prisma schema from the builder stage
 COPY --from=builder /app/engine-api .
 COPY --from=builder /app/prisma ./prisma
 
-# Expose the port
 EXPOSE 8080
-
-# Run the binary
 CMD ["./engine-api"]
