@@ -6,7 +6,6 @@ import (
 	"context"
 	"fmt"
 	"math"
-	"os/user"
 )
 
 // ratingService defines the interface for core business logic
@@ -14,13 +13,13 @@ type RatingService interface {
 	ProcessContestResults(ctx context.Context, payload models.ContestEndPayload) error
 }
 
-type ratingSerice struct{
-	repo repository.RatingRespository
+type ratingService struct{
+	repo repository.RatingRepository
 }
 
 // newRatingService injects the repository dependency 
 func NewRatingService(repo repository.RatingRepository) RatingService{
-	return &ratingSerice{
+	return &ratingService{
 		repo: repo,
 	}
 }
@@ -79,7 +78,7 @@ func (s *ratingService) ProcessContestResults(ctx context.Context,payload models
 		perfomanceRating := getPerformanceRating(percentile)
 
 		// maths
-		upsetProb := calculateUpsetProbability(user.currentRating,perfomanceRating)
+		upsetProb := calculateUpsetProbability(user.CurrentRating,perfomanceRating)
 		fmt.Printf("User %s | Perf: %d | Anomaly Prob: %.2f%%\n",user.ID,perfomanceRating,upsetProb*100)
 
 		// step-5 (A fixed-gain Kalman Filter (K=0.5))
