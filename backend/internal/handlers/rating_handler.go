@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"contest-backend/internal/models"
 	"contest-backend/internal/services"
+	"fmt"
 )
 
 // ratingHandler 
@@ -30,8 +31,9 @@ func (h *ratingHandler) HandleContestEnd(c * fiber.Ctx) error {
 
 	// parsing the incoming JSON body
 	if err := c.BodyParser(&payload); err != nil {
+    	// fmt.Printf("BODY PARSE ERROR: %v", err) only used for testing 
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":"Invalid request apyload format",
+			"error":"Invalid request payload format",
 		})
 	}
 
@@ -49,7 +51,7 @@ func (h *ratingHandler) HandleContestEnd(c * fiber.Ctx) error {
 	// passing the validated data to the service layer for mathematical processing
 	if err := h.service.ProcessContestResults(ctx,payload);err != nil{
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":"Failde to process contest results",
+			"error":"Failed to process contest results",
 			"details": err.Error(),
 		})
 	}
