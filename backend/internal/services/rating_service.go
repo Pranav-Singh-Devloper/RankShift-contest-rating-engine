@@ -14,6 +14,8 @@ import (
 type RatingService interface {
 	ProcessContestResults(ctx context.Context, payload models.ContestEndPayload) error
 	GetUserProfile(ctx context.Context, userID string) (*db.UserModel, error)
+	GetAllContests(ctx context.Context) ([]db.ContestModel, error)
+	CreateContest(ctx context.Context, name string, totalParticipants int) (*db.ContestModel, error)
 }
 
 type ratingService struct{
@@ -123,3 +125,10 @@ func (s * ratingService) GetUserProfile(ctx context.Context, userID string) (*db
 	return s.repo.GetUserProfile(ctx,userID)
 }
 
+func (s *ratingService) GetAllContests(ctx context.Context) ([]db.ContestModel, error) {
+	return s.repo.GetAllContests(ctx)
+}
+
+func (s *ratingService) CreateContest(ctx context.Context, name string, totalParticipants int) (*db.ContestModel, error) {
+	return s.repo.CreateContest(ctx, name, totalParticipants)
+}

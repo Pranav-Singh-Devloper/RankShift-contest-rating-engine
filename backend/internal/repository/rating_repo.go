@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"contest-backend/prisma/db"
+	"time"
 )
 
 // update_params safely packages all teh data needed to apply a rating change 
@@ -28,6 +29,8 @@ type RatingRepository interface{
 	GetUser(ctx context.Context, userID string) (*db.UserModel,error)
 	SaveRatingUpdate(ctx context.Context, params UpdateParams) error
 	GetUserProfile(ctx context.Context, UserID string) (*db.UserModel,error)
+	GetAllContests(ctx context.Context) ([]db.ContestModel, error)
+	CreateContest(ctx context.Context, name string, totalParticipants int) (*db.ContestModel, error)
 }
 
 type ratingRepo struct {
@@ -108,4 +111,17 @@ func (r *ratingRepo) GetUserProfile(ctx context.Context, userID string)(*db.User
 		return nil,err
 	}
 	return user,nil
+}
+
+func (r *ratingRepo) GetAllContests(ctx context.Context) ([]db.ContestModel, error) {
+	// Prisma fetches all contests
+	return r.client.Contest.FindMany().Exec(ctx)
+}
+
+func (r *ratingRepo) CreateContest(ctx context.Context, name string, totalParticipants int) (*db.ContestModel, error) {
+	return r.client.Contest.CreateOne(
+		db.Contest.Name.Set(name),
+		db.Contest.TotalParticipants.Set(totalParticipants),
+		db.Contest.Date.Set(time.Now().UTC()), // Automatically logs the current time
+	).Exec(ctx)
 }

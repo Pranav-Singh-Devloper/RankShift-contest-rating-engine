@@ -18,4 +18,10 @@ func SetupRoutes(app *fiber.App, ratingHandler handlers.RatingHandler){
 
 	// Histroy Route
 	api.Get("/users/:id",ratingHandler.GetProfile)
+
+	// all contests 
+	api.Get("/contests", ratingHandler.GetAllContests)
+
+	// create contests
+	api.Post("/contests", ratingHandler.CreateContest)
 }

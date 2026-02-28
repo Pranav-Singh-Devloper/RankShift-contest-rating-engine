@@ -12,6 +12,8 @@ import (
 type RatingHandler interface {
 	HandleContestEnd(c *fiber.Ctx) error
 	GetProfile(c *fiber.Ctx) error
+	GetAllContests(c *fiber.Ctx) error
+	CreateContest(c *fiber.Ctx) error
 }
 
 type ratingHandler struct {
@@ -74,4 +76,40 @@ func (h *ratingHandler) GetProfile(c *fiber.Ctx) error {
 		})
 	}
 	return c.Status(fiber.StatusOK).JSON(user)
+}
+
+func (h *ratingHandler) GetAllContests(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	contests, err := h.service.GetAllContests(ctx)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to fetch contests",
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(contests)
+}
+
+func (h *ratingHandler) CreateContest(c *fiber.Ctx) error {
+	// Inline struct to catch the incoming JSON
+	var payload struct {
+		Name              string `json:"name"`
+		TotalParticipants int    `json:"total_participants"`
+	}
+
+	if err := c.BodyParser(&payload); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid payload"})
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	contest, err := h.service.CreateContest(ctx, payload.Name, payload.TotalParticipants)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to create contest"})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(contest)
 }
