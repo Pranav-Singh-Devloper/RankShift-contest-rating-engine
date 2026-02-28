@@ -16,27 +16,34 @@ Every time a contest ends, the engine evaluates each participant using the follo
 1. **Calculate Beaten**: `Beaten = Total Participants - Rank`
 2. **Determine Percentile**: `Percentile = Beaten / Total Participants`
 3. **Identify Bracket**: Map the computed percentile to a predefined tier (e.g., Top 10%, Top 50%).
-4. **Assign Standard Performance**: Retrieve the fixed standard performance rating ($\rho$) associated with that specific bracket.
-5. **Compute Rating Change**: $\Delta R = (\rho - R_{old}) / 2$
-6. **Update Rating**: $R_{new} = R_{old} + \Delta R$
-7. **Tier Reassignment**: Automatically update the user's string-based tier based on their $R_{new}$.
+4. **Assign Standard Performance**: Retrieve the fixed standard performance rating (`ρ`) associated with that specific bracket.
+5. **Compute Rating Change**: 
+
+$$\Delta R=\frac{\rho-R_{old}}{2}$$
+
+6. **Update Rating**: 
+
+$$R_{new}=R_{old}+\Delta R$$
+
+7. **Tier Reassignment**: Automatically update the user's string-based tier based on their new rating.
 
 ### 2. Advanced State Estimation (Kalman Filter)
 While the formula `(Performance Rating - Actual Rating) / 2` appears simple, it is actually a specific implementation of a **Discrete Kalman Filter** operating under a fixed steady-state assumption. 
 
 In state estimation theory:
-$\hat{x}_{k} = \hat{x}_{k-1} + K_k (z_k - \hat{x}_{k-1})$
 
-By strictly dividing the difference by 2, our system sets a constant Kalman Gain of $K = 0.5$. In stochastic terms, this asserts that the uncertainty (variance) of the user's historical rating is exactly equal to the noise of their single-contest performance. This guarantees a mathematically stable mean-reversion, preventing hyper-inflation of ratings from isolated outlier performances.
+$$\hat{x}_{k}=\hat{x}_{k-1}+K_k(z_k-\hat{x}_{k-1})$$
+
+By strictly dividing the difference by 2, our system sets a constant Kalman Gain of $K=0.5$. In stochastic terms, this asserts that the uncertainty (variance) of the user's historical rating is exactly equal to the noise of their single-contest performance. This guarantees a mathematically stable mean-reversion, preventing hyper-inflation of ratings from isolated outlier performances.
 
 ### 3. Statistical Anomaly Detection (Logistic CDF)
 To ensure platform integrity and detect statistical anomalies (e.g., potential cheating or extreme upsets), the engine integrates a Logistic Cumulative Distribution Function derived from the Elo rating system. 
 
+The expected probability (`E`) of a user achieving their assigned performance rating (`ρ`) given their prior rating (`R_{old}`) is calculated as:
 
-The expected probability $E$ of a user achieving their assigned performance rating $\rho$ given their prior rating $R_{old}$ is calculated as:
-$E = \frac{1}{1 + 10^{(\rho - R_{old})/400}}$
+$$E=\frac{1}{1+10^{(\rho-R_{old})/400}}$$
 
-If $E < 0.05$, the performance represents a $95\%$ statistical upset, triggering internal analytics for anomaly review without delaying the immediate mathematical update.
+If `E < 0.05`, the performance represents a 95% statistical upset, triggering internal analytics for anomaly review without delaying the immediate mathematical update.
 
 ---
 

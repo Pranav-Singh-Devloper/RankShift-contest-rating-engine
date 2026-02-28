@@ -34,7 +34,7 @@ func NewRatingService(repo repository.RatingRepository) RatingService{
 
 func calculateUpsetProbability(currentRating,performanceRating int) float64{
 	exponent := float64(performanceRating-currentRating) / 400.0 
-	probability := 1.0/(1.0 + math.Pow(10,exponent))
+	probability := 1.0/(1.0 + math.Pow(10,exponent)) // Formula: E = 1 / (1 + 10^((Perf - Rating)/400))
 	return probability
 }
 
