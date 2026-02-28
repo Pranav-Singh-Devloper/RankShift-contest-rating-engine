@@ -26,7 +26,7 @@ func main(){
 		AppName: "Contest Rating Engine v1.0",
 	})
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: "http://localhost:3000",
+		AllowOrigins: "*",
 		AllowHeaders: "Origin, Content-Type, Accept",
 		AllowMethods: "GET, POST, OPTIONS",
 	}))
