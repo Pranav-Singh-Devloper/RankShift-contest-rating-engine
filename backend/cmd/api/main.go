@@ -3,44 +3,40 @@ import (
 	"log"
 	"os"
 	"github.com/gofiber/fiber/v2"
-	"github.com/joho/godotenv"
-	"contest-backend/prisma/db"
+	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/recover"
+	"contest-backend/internal/config"
+	"contest-backend/internal/handlers"
+	"contest-backend/internal/repository"
+	"contest-backend/internal/routes"
+	"contest-backend/internal/services"
 )
 
-var PrismaClient *db.PrismaClient
 
 func main(){
-	if os.Getenv("APP_ENV") != "production"{
-		_ = godotenv.Load()
-	}
+	dbClient := config.ConnectDB()
+	defer config.DisconnectDB(dbClient)
 
-	// database connection logic 
-	PrismaClient = db.NewClient()
-	if err := PrismaClient.Prisma.Connect(); err != nil {
-		log.Println("Database connection failed:",err)
-		os.Exit(1)
-	}
-	defer PrismaClient.Prisma.Disconnect()
-	
-	log.Println("Database connected successfull")
+	ratingRepo := repository.NewRatingRepository(dbClient)
+	ratingService := services.NewRatingService(ratingRepo)
+	ratingHandler := handlers.NewRatingHandler(ratingService)
 
-	// initialize the go fiber server 
-	app := fiber.New()
-
-	// simple health check
-	app.Get("/health", func(c *fiber.Ctx) error{
-		return c.SendString("Contest Rating Engine is live!")
+	app := fiber.New(fiber.Config{
+		AppName: "Contest Rating Engine v1.0",
 	})
+
+	app.Use(logger.New())
+	app.Use(recover.New())
+
+	routes.SetupRoutes(app, ratingHandler)
 
 	port := os.Getenv("PORT")
 	if port == ""{
 		port = "8080"
 	}
 
-	log.Printf("String server on port %s",port)
-	if err := app.Listen(":"+port); err != nil{
-		log.Fatalf("Server failde to start: %v",err)
+	log.Printf("Starting Clean Architecture server on port %s...",port)
+	if err := app.Listen(":"+port);err != nil {
+		log.Fatalf("Server failed to start: %v", err)
 	}
-
-
 }

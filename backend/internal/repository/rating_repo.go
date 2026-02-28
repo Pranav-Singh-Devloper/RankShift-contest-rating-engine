@@ -34,7 +34,7 @@ type ratingRepo struct {
 }
 
 // newRatingRepository is the constructor injecting the prisma client 
-func NewRatingRespository(client *db.PrismaClient) RatingRepository{
+func NewRatingRepository(client *db.PrismaClient) RatingRepository{
 	return &ratingRepo{
 		client: client,
 	}
