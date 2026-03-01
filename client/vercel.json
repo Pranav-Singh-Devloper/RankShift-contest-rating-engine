@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/backend/cmd/api/$1"
+    },
+    {
+      "source": "/profile/:userId",
+      "destination": "/frontend/src/app/profile/[userId]/page"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/frontend/src/app/$1"
+    }
+  ]
+}
